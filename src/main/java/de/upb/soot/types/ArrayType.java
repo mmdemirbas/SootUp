@@ -1,14 +1,15 @@
 package de.upb.soot.types;
 
 import com.google.common.base.Objects;
+import javax.annotation.Nonnull;
 
 public class ArrayType extends ReferenceType {
 
-  private final Type baseType;
+  @Nonnull private final Type baseType;
 
   private final int dimension;
 
-  public ArrayType(Type baseType, int dimension) {
+  public ArrayType(@Nonnull Type baseType, int dimension) {
     this.baseType = baseType;
     this.dimension = dimension;
   }
@@ -42,6 +43,7 @@ public class ArrayType extends ReferenceType {
     return Objects.hashCode(baseType, dimension);
   }
 
+  @Nonnull
   public Type getBaseType() {
     return baseType;
   }
