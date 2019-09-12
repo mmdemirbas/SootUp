@@ -35,9 +35,11 @@ import de.upb.soot.views.View;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /** Represents the unique fully-qualified name of a Class (aka its signature). */
 public class JavaClassType extends ReferenceType {
@@ -50,11 +52,14 @@ public class JavaClassType extends ReferenceType {
       Pattern.compile(
           "^(?:java\\.|sun\\.|javax\\.|com\\.sun\\.|org\\.omg\\.|org\\.xml\\.|org\\.w3c\\.dom)");
 
-  private final String className;
+  @Nonnull private final String className;
 
-  private final PackageName packageName;
+  @Nonnull private final PackageName packageName;
 
   private final boolean isInnerClass;
+
+  @Nullable private final List<GenericTypeConstraint> formalTypeConstraints;
+  @Nullable private final List<GenericTypeConstraint> actualTypeConstraints;
 
   // TODO Can we hide this somehow from the public API surface?
   /**
@@ -62,22 +67,22 @@ public class JavaClassType extends ReferenceType {
    * {@link IdentifierFactory}
    *
    * @param className the simple name of the class, e.g., ClassA NOT my.package.ClassA
-   * @param packageSignature the corresponding package
+   * @param packageName the corresponding package
    */
-  public JavaClassType(final String className, final PackageName packageName) {
+  public JavaClassType(@Nonnull final String className, @Nonnull final PackageName packageName) {
     String realClassName = className;
-    boolean innerClass = false;
     // use $ to separate inner and outer class name
     if (realClassName.contains(".")) {
       realClassName = realClassName.replace(".", "$");
     }
     // if the constructor was invoked with an ASM classname
-    if (realClassName.contains("$")) {
-      innerClass = true;
-    }
+    // The $ needs to have at least one character before it
+    boolean innerClass = realClassName.indexOf('$') > 0;
     this.className = realClassName;
     this.packageName = packageName;
     this.isInnerClass = innerClass;
+    this.formalTypeConstraints = null;
+    this.actualTypeConstraints = null;
   }
 
   @Override
@@ -144,11 +149,13 @@ public class JavaClassType extends ReferenceType {
   }
 
   /** The simple class name. */
+  @Nonnull
   public String getClassName() {
     return className;
   }
 
   /** The package in which the class resides. */
+  @Nonnull
   public PackageName getPackageName() {
     return packageName;
   }
@@ -160,14 +167,6 @@ public class JavaClassType extends ReferenceType {
 
   public boolean isJavaLibraryClass() {
     return LIBRARY_CLASS_PATTERN.matcher(getClassName()).find();
-  }
-
-  private static final class SplitPatternHolder {
-    private static final char SPLIT_CHAR = '.';
-
-    @Nonnull
-    private static final Pattern SPLIT_PATTERN =
-        Pattern.compile(Character.toString(SPLIT_CHAR), Pattern.LITERAL);
   }
 
   /**
