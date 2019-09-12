@@ -159,8 +159,7 @@ public class JavaClassPathAnalysisInputLocation extends AbstractAnalysisInputLoc
   }
 
   private @Nonnull Optional<AbstractAnalysisInputLocation> nsForPath(@Nonnull Path path) {
-    if (Files.exists(path)
-        && (java.nio.file.Files.isDirectory(path) || PathUtils.isArchive(path))) {
+    if (Files.exists(path) && (Files.isDirectory(path) || PathUtils.isArchive(path))) {
       return Optional.of(PathBasedAnalysisInputLocation.createForClassContainer(path));
     } else {
       logger.warn("Invalid/Unknown class path entry: " + path);
