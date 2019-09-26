@@ -6,6 +6,7 @@ public class GenericTypeConstraint {
 
   private GenericTypeConstraint() {}
 
+  /** Represents a specific type as the actual argument for a type parameter. */
   public static class Exact extends GenericTypeConstraint {
     @Nonnull private final JavaClassType type;
 
@@ -13,26 +14,16 @@ public class GenericTypeConstraint {
       this.type = type;
     }
 
+    /** @see Exact */
     @Nonnull
     public JavaClassType getType() {
       return type;
     }
   }
 
-  public static class Super extends GenericTypeConstraint {
-    @Nonnull private final JavaClassType extendingType;
-
-    public Super(@Nonnull JavaClassType extendingType) {
-      this.extendingType = extendingType;
-    }
-
-    @Nonnull
-    public JavaClassType getExtendingType() {
-      return extendingType;
-    }
-  }
-
+  /** Represents a constraint of the form <code>T1 extends T2</code>. */
   public static class Extends extends GenericTypeConstraint {
+
     @Nonnull private final String name;
 
     @Nonnull private final JavaClassType extendedType;
@@ -42,11 +33,16 @@ public class GenericTypeConstraint {
       this.extendedType = extendedType;
     }
 
+    /** A symbolic name, e.g. <code>T</code>. */
     @Nonnull
     public String getName() {
       return name;
     }
 
+    /**
+     * A type <code>T</code> must extend. If this has been omitted in Java, this becomes <code>
+     * java.lang.Object</code>.
+     */
     @Nonnull
     public JavaClassType getExtendedType() {
       return extendedType;

@@ -59,7 +59,7 @@ public class JavaClassType extends ReferenceType {
   private final boolean isInnerClass;
 
   @Nullable private final List<GenericTypeConstraint> formalTypeConstraints;
-  @Nullable private final List<GenericTypeConstraint> actualTypeConstraints;
+  @Nullable private final List<GenericTypeConstraint> superClassActualTypeConstraints;
 
   // TODO Can we hide this somehow from the public API surface?
   /**
@@ -82,7 +82,7 @@ public class JavaClassType extends ReferenceType {
     this.packageName = packageName;
     this.isInnerClass = innerClass;
     this.formalTypeConstraints = null;
-    this.actualTypeConstraints = null;
+    this.superClassActualTypeConstraints = null;
   }
 
   @Override
