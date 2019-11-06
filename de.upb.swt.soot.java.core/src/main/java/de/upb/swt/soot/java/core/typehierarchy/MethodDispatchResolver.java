@@ -1,4 +1,4 @@
-package de.upb.swt.soot.callgraph.typehierarchy;
+package de.upb.swt.soot.java.core.typehierarchy;
 
 import de.upb.swt.soot.core.frontend.AbstractClassSource;
 import de.upb.swt.soot.core.frontend.ResolveException;

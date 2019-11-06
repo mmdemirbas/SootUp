@@ -1,4 +1,4 @@
-package de.upb.swt.soot.test.callgraph.typehierarchy;
+package de.upb.swt.soot.typehierarchy;
 
 import static de.upb.swt.soot.core.util.ImmutableUtils.immutableList;
 import static de.upb.swt.soot.core.util.ImmutableUtils.immutableSet;
@@ -10,7 +10,6 @@ import static org.junit.Assert.assertTrue;
 import categories.Java8Test;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import de.upb.swt.soot.callgraph.typehierarchy.ViewTypeHierarchy;
 import de.upb.swt.soot.core.IdentifierFactory;
 import de.upb.swt.soot.core.Project;
 import de.upb.swt.soot.core.frontend.OverridingClassSource;
@@ -23,6 +22,7 @@ import de.upb.swt.soot.core.views.View;
 import de.upb.swt.soot.java.bytecode.inputlocation.JavaClassPathAnalysisInputLocation;
 import de.upb.swt.soot.java.core.JavaProject;
 import de.upb.swt.soot.java.core.language.JavaLanguage;
+import de.upb.swt.soot.java.core.typehierarchy.ViewTypeHierarchy;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;

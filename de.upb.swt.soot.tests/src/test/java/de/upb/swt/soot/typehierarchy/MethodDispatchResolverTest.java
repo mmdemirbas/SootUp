@@ -1,10 +1,10 @@
-package de.upb.swt.soot.test.callgraph.typehierarchy;
+package de.upb.swt.soot.typehierarchy;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import de.upb.swt.soot.callgraph.typehierarchy.MethodDispatchResolver;
+import de.upb.swt.soot.java.core.typehierarchy.MethodDispatchResolver;
 import de.upb.swt.soot.core.IdentifierFactory;
 import de.upb.swt.soot.core.Project;
 import de.upb.swt.soot.core.frontend.ResolveException;

@@ -1,11 +1,13 @@
 package de.upb.swt.soot.java.bytecode.interceptors.typeinference;
 
 import de.upb.swt.soot.core.jimple.basic.Local;
+import de.upb.swt.soot.core.jimple.common.expr.Expr;
 import de.upb.swt.soot.core.jimple.common.stmt.JAssignStmt;
 import de.upb.swt.soot.core.jimple.common.stmt.Stmt;
 import de.upb.swt.soot.core.model.Body;
 import de.upb.swt.soot.core.transform.BodyInterceptor;
 import de.upb.swt.soot.core.types.Type;
+import de.upb.swt.soot.java.core.typehierarchy.TypeHierarchy;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -43,11 +45,15 @@ public class Stage1 implements BodyInterceptor {
     typings.add(initialTyping);
 
     Map<Typing, Deque<JAssignStmt>> worklists = new HashMap<>();
-    worklists.put(initialTyping, localAssignments.collect(Collectors.toCollection(ArrayDeque::new)));
+    worklists.put(
+        initialTyping, localAssignments.collect(Collectors.toCollection(ArrayDeque::new)));
 
     while (true) {
       Typing incompleteTyping =
-          typings.stream().filter(typing -> !worklists.get(typing).isEmpty()).findAny().orElse(null);
+          typings.stream()
+              .filter(typing -> !worklists.get(typing).isEmpty())
+              .findAny()
+              .orElse(null);
       if (incompleteTyping == null) break;
 
       typings.remove(incompleteTyping);
@@ -66,7 +72,14 @@ public class Stage1 implements BodyInterceptor {
     //    if s is supertype of all types
     //      lca += s
     //    else
-    //      traverse up in hierarchy from s until the if-condition is met or there is no higher type.
+    //      traverse up in hierarchy from s until the if-condition is met or there is no higher
+    // type.
     // return lca
+
+    throw new UnsupportedOperationException();
+  }
+
+  private static Type eval(Typing typing, Expr expr) {
+    throw new UnsupportedOperationException();
   }
 }
