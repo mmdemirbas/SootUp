@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import de.upb.swt.soot.java.core.typehierarchy.MethodDispatchResolver;
 import de.upb.swt.soot.core.IdentifierFactory;
 import de.upb.swt.soot.core.Project;
 import de.upb.swt.soot.core.frontend.ResolveException;
@@ -17,6 +16,7 @@ import de.upb.swt.soot.java.bytecode.inputlocation.JavaClassPathAnalysisInputLoc
 import de.upb.swt.soot.java.core.JavaProject;
 import de.upb.swt.soot.java.core.language.JavaJimple;
 import de.upb.swt.soot.java.core.language.JavaLanguage;
+import de.upb.swt.soot.java.core.typehierarchy.MethodDispatchResolver;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
