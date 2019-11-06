@@ -1,7 +1,12 @@
 package de.upb.swt.soot.java.core.typehierarchy;
 
 import com.google.common.base.Suppliers;
-import de.upb.swt.soot.core.types.*;
+import de.upb.swt.soot.core.types.ArrayType;
+import de.upb.swt.soot.core.types.ClassType;
+import de.upb.swt.soot.core.types.NullType;
+import de.upb.swt.soot.core.types.PrimitiveType;
+import de.upb.swt.soot.core.types.ReferenceType;
+import de.upb.swt.soot.core.types.Type;
 import de.upb.swt.soot.core.views.View;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +58,17 @@ public interface TypeHierarchy {
    */
   @Nonnull
   Set<ClassType> implementedInterfacesOf(@Nonnull ClassType type);
+
+  // TODO Write tests
+  /**
+   * Returns the interfaces implemented by <code>type</code> if it is a class or extended by <code>
+   * type</code> if it is an interface. This <b>does not</b> include interfaces implemented by
+   * superclasses and also <b>does not</b> cover the case where <code>classType</code> directly or
+   * indirectly implements an interface <code>I1</code> that extends another interface <code>I2
+   * </code>. <code>I2</code> will be considered an implemented interface of <code>classType</code>.
+   */
+  @Nonnull
+  Set<ClassType> directlyImplementedInterfacesOf(@Nonnull ClassType type);
 
   /**
    * For an interface type, this does the same as {@link #implementersOf(ClassType)}. For a class

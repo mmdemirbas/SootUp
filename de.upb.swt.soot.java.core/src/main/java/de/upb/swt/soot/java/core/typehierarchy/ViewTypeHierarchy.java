@@ -159,6 +159,21 @@ public class ViewTypeHierarchy implements MutableTypeHierarchy {
     }
   }
 
+  @Nonnull
+  @Override
+  public Set<ClassType> directlyImplementedInterfacesOf(@Nonnull ClassType type) {
+    ScanResult scanResult = lazyScanResult.get();
+    Vertex vertex = scanResult.typeToVertex.get(type);
+
+    if (vertex == null) {
+      throw new ResolveException("Could not find " + type + " in hierarchy for view " + view);
+    }
+
+    return directlyExtendedInterfacesOf(vertex)
+        .map(v -> v.javaClassType)
+        .collect(Collectors.toSet());
+  }
+
   /**
    * Recursively obtains all interfaces this interface extends, including transitively extended
    * interfaces.
