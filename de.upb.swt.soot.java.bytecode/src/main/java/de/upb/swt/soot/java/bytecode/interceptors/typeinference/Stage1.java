@@ -6,6 +6,9 @@ import de.upb.swt.soot.core.jimple.common.stmt.JAssignStmt;
 import de.upb.swt.soot.core.jimple.common.stmt.Stmt;
 import de.upb.swt.soot.core.model.Body;
 import de.upb.swt.soot.core.transform.BodyInterceptor;
+import de.upb.swt.soot.core.types.ArrayType;
+import de.upb.swt.soot.core.types.ClassType;
+import de.upb.swt.soot.core.types.ReferenceType;
 import de.upb.swt.soot.core.types.Type;
 import de.upb.swt.soot.java.core.typehierarchy.TypeHierarchy;
 import java.util.ArrayDeque;
@@ -19,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class Stage1 implements BodyInterceptor {
 
@@ -65,18 +69,53 @@ public class Stage1 implements BodyInterceptor {
     return originalBody.withStmts(stmts);
   }
 
-  private static Set<Type> leastCommonAncestors(Set<Type> types, TypeHierarchy hierarchy) {
-    // lca := {}
-    // For each type t
-    //  For each direct supertype s of t
-    //    if s is supertype of all types
-    //      lca += s
-    //    else
-    //      traverse up in hierarchy from s until the if-condition is met or there is no higher
-    // type.
-    // return lca
+  // TODO Document
+  @Nullable
+  private static Type firstNonCommonAncestor(
+      Set<Type> types, TypeHierarchy hierarchy, Set<Type> lcaCandidates) {
+    for (Type lcaCandidate : lcaCandidates) {
+      for (Type type : types) {
+        if (!hierarchy.isSubtype(lcaCandidate, type)) {
+          return lcaCandidate;
+        }
+      }
+    }
 
-    throw new UnsupportedOperationException();
+    return null;
+  }
+
+  // TODO Document, test
+  private static Set<Type> leastCommonAncestors(Set<Type> types, TypeHierarchy hierarchy) {
+    for (Type type : types) {
+      if (!(type instanceof ReferenceType)) {
+        throw new IllegalArgumentException(
+            "Type set contains type '" + type + "' that is not a reference type");
+      }
+      if (type instanceof ArrayType) {
+        throw new UnsupportedOperationException(
+            "leastCommonAncestors is not yet implemented for array types");
+      }
+    }
+
+    Set<Type> lcaCandidates = new HashSet<>(types);
+    Type nonLca = firstNonCommonAncestor(types, hierarchy, lcaCandidates);
+    while (nonLca != null) {
+      ClassType nonLcaClassType = (ClassType) nonLca;
+
+      Set<ClassType> implementedInterfacesOf =
+          hierarchy.directlyImplementedInterfacesOf(nonLcaClassType);
+      ClassType typeSuperClass = hierarchy.superClassOf(nonLcaClassType);
+
+      lcaCandidates.remove(nonLca);
+      lcaCandidates.addAll(implementedInterfacesOf);
+      if (typeSuperClass != null) {
+        lcaCandidates.add(typeSuperClass);
+      }
+
+      nonLca = firstNonCommonAncestor(types, hierarchy, lcaCandidates);
+    }
+
+    return lcaCandidates;
   }
 
   private static Type eval(Typing typing, Expr expr) {
