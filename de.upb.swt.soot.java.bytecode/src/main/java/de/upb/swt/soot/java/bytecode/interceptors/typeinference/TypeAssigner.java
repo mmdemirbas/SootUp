@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class Stage1 implements BodyInterceptor {
+public class TypeAssigner implements BodyInterceptor {
 
   private static class BottomType extends Type {
 
@@ -45,7 +45,7 @@ public class Stage1 implements BodyInterceptor {
 
   @Nonnull private final TypeHierarchy hierarchy;
 
-  public Stage1(@Nonnull TypeHierarchy hierarchy) {
+  public TypeAssigner(@Nonnull TypeHierarchy hierarchy) {
     this.hierarchy = hierarchy;
   }
 
@@ -188,7 +188,10 @@ public class Stage1 implements BodyInterceptor {
     return lcaCandidates;
   }
 
-  /** Evaluates the type of <code>expr</code> under the <code>typing</code> */
+  /**
+   * Evaluates the type of <code>expr</code> under the <code>typing</code>. Corresponds to the
+   * <code>eval</code> function from the paper.
+   */
   private static Type typeOfExprUnderTyping(Typing typing, Value expr) {
     throw new UnsupportedOperationException();
   }
