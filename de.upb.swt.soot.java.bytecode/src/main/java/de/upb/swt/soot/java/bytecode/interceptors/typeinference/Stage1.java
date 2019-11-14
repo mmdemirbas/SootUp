@@ -85,6 +85,7 @@ public class Stage1 implements BodyInterceptor {
       JAssignStmt assignStmt = Objects.requireNonNull(worklists.get(incompleteTyping).poll());
       Local assignmentLeft = (Local) assignStmt.getLeftOp();
 
+      // TODO Does this set to be recomputed after each iteration of the following loop?
       Set<Type> lcas =
           leastCommonAncestors(
               ImmutableUtils.immutableSet(
