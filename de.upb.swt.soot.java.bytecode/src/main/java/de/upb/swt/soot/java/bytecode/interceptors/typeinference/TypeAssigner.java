@@ -27,6 +27,14 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+// Implementation according to Bellamy et al., "Efficient Local Type Inference"
+
+// The approach below might not always work. See section 3.3 of the paper.
+// It outlines that two transformations might be needed sometimes:
+// "The first is a particular variable-splitting transformation [...]",
+// but the second transformation is not mentioned. It might be mentioned in citation [8].
+// Additionally, section 5 "INFERRING JAVA SOURCE TYPES" must be implemented.
+
 public class TypeAssigner implements BodyInterceptor {
 
   private static class BottomType extends Type {
@@ -38,7 +46,7 @@ public class TypeAssigner implements BodyInterceptor {
 
     Typing() {}
 
-    Typing(Map<? extends Local, ? extends Type> m) {
+    Typing(@Nonnull Map<? extends Local, ? extends Type> m) {
       super(m);
     }
   }
@@ -64,8 +72,11 @@ public class TypeAssigner implements BodyInterceptor {
 
     Map<Local, Set<JAssignStmt>> depends = dependentAssignments(originalBody);
 
+    // Corresponds to σ
     Typing initialTyping = new Typing();
     originalBody.getLocals().forEach(local -> initialTyping.put(local, BottomType.instance));
+
+    // Corresponds to Σ
     Set<Typing> typings = new HashSet<>();
     typings.add(initialTyping);
 
@@ -74,6 +85,7 @@ public class TypeAssigner implements BodyInterceptor {
         initialTyping, localAssignments.collect(Collectors.toCollection(ArrayDeque::new)));
 
     while (true) {
+      // Corresponds to σ in line 6 of the pseudocode of Algorithm 2
       Typing incompleteTyping =
           typings.stream()
               .filter(typing -> !worklists.get(typing).isEmpty())
@@ -82,6 +94,8 @@ public class TypeAssigner implements BodyInterceptor {
       if (incompleteTyping == null) break;
 
       typings.remove(incompleteTyping);
+
+      // Corresponds to (v := e)
       JAssignStmt assignStmt = Objects.requireNonNull(worklists.get(incompleteTyping).poll());
       Local assignmentLeft = (Local) assignStmt.getLeftOp();
 
@@ -93,6 +107,7 @@ public class TypeAssigner implements BodyInterceptor {
                   typeOfExprUnderTyping(incompleteTyping, assignStmt.getRightOp())),
               hierarchy);
       for (Type type : lcas) {
+        // `type` corresponds to `t` in line 10
         if (type.equals(incompleteTyping.get(assignmentLeft))) {
           typings.add(incompleteTyping);
         } else {
@@ -106,16 +121,62 @@ public class TypeAssigner implements BodyInterceptor {
       }
     }
 
-    // TODO We have now computed the candidate typings. Check paper for what should be done next
+    // We can now pick any typing from the typings set
+    Typing typing =
+        typings.stream()
+            .findAny()
+            .orElseThrow(() -> new RuntimeException("Did not find a valid typing"));
+    return applyTyping(typing, originalBody);
+  }
 
-    return originalBody.withStmts(stmts);
+  /**
+   * Replaces all {@link Local}s in the body with typed ones according to the supplied {@link
+   * Typing}.
+   */
+  @Nonnull
+  private static Body applyTyping(@Nonnull Typing typing, @Nonnull Body originalBody) {
+    Set<Local> originalLocals = originalBody.getLocals();
+    List<Stmt> originalStmts = originalBody.getStmts();
+
+    Map<Local, Local> originalLocalToTypedLocal =
+        originalLocals.stream()
+            .collect(
+                Collectors.toMap(
+                    originalLocal -> originalLocal,
+                    originalLocal -> originalLocal.withType(typing.get(originalLocal))));
+
+    List<Stmt> typedStmts =
+        originalStmts.stream()
+            .map(stmt -> replaceLocalsIn(stmt, originalLocalToTypedLocal))
+            .collect(Collectors.toList());
+
+    return originalBody
+        .withLocals(new HashSet<>(originalLocalToTypedLocal.values()))
+        .withStmts(typedStmts);
+  }
+
+  /**
+   * Checks <code>stmt</code> for Locals that are found in <code>originalLocalToTypedLocal</code>,
+   * copies <code>stmt</code> in this case and replaces the old Local with the new, typed Local.
+   */
+  @Nonnull
+  private static Stmt replaceLocalsIn(
+      @Nonnull Stmt stmt, @Nonnull Map<Local, Local> originalLocalToTypedLocal) {
+    // TODO: Check if the `stmt` contains a local from `originalLocalToTypedLocal`.
+    //   If one is found, the stmts needs to be copied and the old Local replaced with the typed
+    //   Local from the map.
+    //   This needs to handle all combinations from *Stmt and *Expr types. This is not ideal
+    //   and architectural changes should be evaluated to make this easier. Immutability
+    //   is increasing the code complexity a lot here. A simple `Local.setType(newType)` would
+    //   have avoided this, but is currently not possible without breaking immutability guarantees.
+    throw new UnsupportedOperationException("TODO");
   }
 
   /**
    * Constructs a map <code>depends</code> such that <code>depends.get(v)</code> is a set containing
    * all assignments to some local with <code>v</code> on the right-hand side.
    */
-  private static Map<Local, Set<JAssignStmt>> dependentAssignments(Body body) {
+  private static Map<Local, Set<JAssignStmt>> dependentAssignments(@Nonnull Body body) {
     Map<Local, Set<JAssignStmt>> depends = new HashMap<>();
     for (Stmt stmt : body.getStmts()) {
       if (!(stmt instanceof JAssignStmt)) {
@@ -139,10 +200,14 @@ public class TypeAssigner implements BodyInterceptor {
     return depends;
   }
 
-  // TODO Document
+  /**
+   * Finds a type in <code>lcaCandidates</code> that is not a supertype of at least one of the types
+   * in the Set <code>types</code>. It is therefore not a common ancestor. If no such value is
+   * found, this function returns <code>null</code>.
+   */
   @Nullable
   private static Type firstNonCommonAncestor(
-      Set<Type> types, TypeHierarchy hierarchy, Set<Type> lcaCandidates) {
+      @Nonnull Set<Type> types, TypeHierarchy hierarchy, @Nonnull Set<Type> lcaCandidates) {
     for (Type lcaCandidate : lcaCandidates) {
       for (Type type : types) {
         if (!hierarchy.isSubtype(lcaCandidate, type)) {
@@ -154,8 +219,13 @@ public class TypeAssigner implements BodyInterceptor {
     return null;
   }
 
-  // TODO Document, test
-  private static Set<Type> leastCommonAncestors(Set<Type> types, TypeHierarchy hierarchy) {
+  /**
+   * Finds the set of lowest common supertypes between the <code>types</code>. Examples: <code>
+   * {String, List} -> {Object}</code>, <code>{HashSet, ArrayList} -> {Collection, Cloneable, ...}
+   * </code>.
+   */
+  private static Set<Type> leastCommonAncestors(
+      @Nonnull Set<Type> types, @Nonnull TypeHierarchy hierarchy) {
     for (Type type : types) {
       if (!(type instanceof ReferenceType)) {
         throw new IllegalArgumentException(
@@ -192,7 +262,7 @@ public class TypeAssigner implements BodyInterceptor {
    * Evaluates the type of <code>expr</code> under the <code>typing</code>. Corresponds to the
    * <code>eval</code> function from the paper.
    */
-  private static Type typeOfExprUnderTyping(Typing typing, Value expr) {
+  private static Type typeOfExprUnderTyping(@Nonnull Typing typing, @Nonnull Value expr) {
     throw new UnsupportedOperationException();
   }
 }
