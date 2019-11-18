@@ -14,7 +14,6 @@ import de.upb.swt.soot.core.types.Type;
 import de.upb.swt.soot.core.util.ImmutableUtils;
 import de.upb.swt.soot.java.core.typehierarchy.TypeHierarchy;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,12 +59,10 @@ public class TypeAssigner implements BodyInterceptor {
   @Nonnull
   @Override
   public Body interceptBody(@Nonnull Body originalBody) {
-    List<Stmt> stmts = new ArrayList<>(originalBody.getStmts());
-
     // Algorithm 2: General type inference algorithm
 
     Stream<JAssignStmt> localAssignments =
-        stmts.stream()
+        originalBody.getStmts().stream()
             .filter(stmt -> stmt instanceof JAssignStmt)
             .map(stmt -> (JAssignStmt) stmt)
             .filter(assignStmt -> assignStmt.getLeftOp() instanceof Local);
