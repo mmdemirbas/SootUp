@@ -16,7 +16,11 @@ import de.upb.swt.soot.core.frontend.OverridingClassSource;
 import de.upb.swt.soot.core.model.Modifier;
 import de.upb.swt.soot.core.model.SootClass;
 import de.upb.swt.soot.core.model.SourceType;
-import de.upb.swt.soot.core.types.*;
+import de.upb.swt.soot.core.types.ArrayType;
+import de.upb.swt.soot.core.types.ClassType;
+import de.upb.swt.soot.core.types.NullType;
+import de.upb.swt.soot.core.types.PrimitiveType;
+import de.upb.swt.soot.core.types.Type;
 import de.upb.swt.soot.core.util.ImmutableUtils;
 import de.upb.swt.soot.core.views.View;
 import de.upb.swt.soot.java.bytecode.inputlocation.JavaClassPathAnalysisInputLocation;
@@ -132,6 +136,33 @@ public class ViewTypeHierarchyTest {
     assertTrue(
         "List is an implementer of Collection",
         typeHierarchy.implementersOf(collection).contains(list));
+  }
+
+  @Test
+  public void directlyImplementedInterfacesOf() {
+    IdentifierFactory factory = view.getIdentifierFactory();
+    ClassType javaClassPathNamespace =
+        factory.getClassType("JavaClassPathNamespace", "de.upb.soot.namespaces");
+    ClassType abstractNamespace =
+        factory.getClassType("AbstractNamespace", "de.upb.soot.namespaces");
+    ClassType iNamespace = factory.getClassType("de.upb.soot.namespaces.INamespace");
+    assertEquals(
+        Collections.emptySet(),
+        typeHierarchy.directlyImplementedInterfacesOf(javaClassPathNamespace));
+    assertEquals(
+        immutableSet(iNamespace), typeHierarchy.directlyImplementedInterfacesOf(abstractNamespace));
+
+    // Test with an interface that extends another one, i.e. List extends Collection
+    ClassType arrayList = factory.getClassType("ArrayList", "java.util");
+    ClassType collection = factory.getClassType("Collection", "java.util");
+    ClassType list = factory.getClassType("List", "java.util");
+    Set<ClassType> implementedInterfacesOfArrayList =
+        typeHierarchy.directlyImplementedInterfacesOf(arrayList);
+    assertFalse(
+        "ArrayList does not directly implement Collection",
+        implementedInterfacesOfArrayList.contains(collection));
+    assertTrue("ArrayList implements Collection", typeHierarchy.isSubtype(collection, arrayList));
+    assertTrue("ArrayList implements List", implementedInterfacesOfArrayList.contains(list));
   }
 
   @Test

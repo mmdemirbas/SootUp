@@ -169,8 +169,9 @@ public class ViewTypeHierarchy implements MutableTypeHierarchy {
       throw new ResolveException("Could not find " + type + " in hierarchy for view " + view);
     }
 
-    return directlyExtendedInterfacesOf(vertex)
-        .map(v -> v.javaClassType)
+    return Stream.concat(
+            directlyExtendedInterfacesOf(vertex).map(v -> v.javaClassType),
+            directlyImplementedInterfacesOf(vertex).map(v -> v.javaClassType))
         .collect(Collectors.toSet());
   }
 

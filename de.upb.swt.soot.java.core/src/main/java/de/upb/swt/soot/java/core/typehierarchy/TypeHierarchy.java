@@ -59,7 +59,6 @@ public interface TypeHierarchy {
   @Nonnull
   Set<ClassType> implementedInterfacesOf(@Nonnull ClassType type);
 
-  // TODO Write tests
   /**
    * Returns the interfaces implemented by <code>type</code> if it is a class or extended by <code>
    * type</code> if it is an interface. This <b>does not</b> include interfaces implemented by
