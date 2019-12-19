@@ -48,4 +48,32 @@ public class GenericTypeConstraint {
       return extendedType;
     }
   }
+
+  /** Represents a constraint of the form <code>T1 super T2</code>. */
+  public static class Super extends GenericTypeConstraint {
+
+    @Nonnull private final String name;
+
+    @Nonnull private final JavaClassType superedType;
+
+    public Super(@Nonnull String name, @Nonnull JavaClassType extendedType) {
+      this.name = name;
+      this.superedType = extendedType;
+    }
+
+    /** A symbolic name, e.g. <code>T</code>. */
+    @Nonnull
+    public String getName() {
+      return name;
+    }
+
+    /**
+     * A type <code>T</code> must be a super class. 
+     */
+    @Nonnull
+    public JavaClassType getSuperedType() {
+      return superedType;
+    }
+  }
+
 }
