@@ -22,7 +22,7 @@ public class SwitchCaseStatement {
                 break;
         }
     }
-
+*/
     public void switchCaseStatementInt() {
         int num = 5;
         String str;
@@ -80,7 +80,7 @@ public class SwitchCaseStatement {
                 str = "other";
         }
     }
-*/
+
     public void switchCaseDifferingAmountOfCaseStmts() {
         int num = 8;
         String str;

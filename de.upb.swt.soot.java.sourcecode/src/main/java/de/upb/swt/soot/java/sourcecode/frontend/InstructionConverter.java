@@ -1210,7 +1210,7 @@ public class InstructionConverter {
 
     for (Map.Entry<JSwitchStmt, List<Integer>> item : targetsOfLookUpSwitchStmts.entrySet()) {
       // FIXME
-      System.out.println();
+      System.out.println("\nsetuptargets:");
 
       final JSwitchStmt switchStmt = item.getKey();
       final List<Integer> targetIdxList = item.getValue();
@@ -1239,6 +1239,9 @@ public class InstructionConverter {
         assert (found);
       }
     }
+
+    // FIXME
+    System.out.println();
   }
 
   /**
