@@ -44,7 +44,6 @@ import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.TypeReference;
-import com.ibm.wala.util.intset.IntIterator;
 import de.upb.swt.soot.core.IdentifierFactory;
 import de.upb.swt.soot.core.jimple.Jimple;
 import de.upb.swt.soot.core.jimple.basic.*;
@@ -540,13 +539,9 @@ public class InstructionConverter {
     targetList.add(defaultCase);
 
     for (int i = 0; i < cases.length; i++) {
-      int c = cases[i];
-      if (i % 2 == 0) {
-        IntConstant cValue = IntConstant.getInstance(c);
-        lookupValues.add(cValue);
-      } else {
-        targetList.add(c);
-      }
+      IntConstant cValue = IntConstant.getInstance(cases[i++]);
+      lookupValues.add(cValue);
+      targetList.add(cases[i]);
     }
 
     Position[] operandPos = new Position[2];
