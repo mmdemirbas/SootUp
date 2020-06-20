@@ -549,19 +549,6 @@ public class InstructionConverter {
       }
     }
 
-    // FIXME: remove one implementation
-    List<Integer> targetList2 = new ArrayList<>();
-    targetList2.add(defaultCase);
-    List<IntConstant> lookupValues2 = new ArrayList<>();
-    final IntIterator labelIterator = inst.iterateLabels();
-    while (labelIterator.hasNext()) {
-      final int labelInt = labelIterator.next();
-      IntConstant cValue = IntConstant.getInstance(labelInt);
-      lookupValues2.add(cValue);
-      targetList2.add(inst.getTarget(labelInt));
-    }
-    assert (targetList.equals(targetList2));
-
     Position[] operandPos = new Position[2];
     // TODO: [ms] how to organize the operands
     // TODO: has no operand positions yet for
