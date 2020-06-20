@@ -44,6 +44,7 @@ import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.TypeReference;
+import com.ibm.wala.util.intset.IntIterator;
 import de.upb.swt.soot.core.IdentifierFactory;
 import de.upb.swt.soot.core.jimple.Jimple;
 import de.upb.swt.soot.core.jimple.basic.*;
@@ -125,6 +126,10 @@ public class InstructionConverter {
 
   public List<Stmt> convertInstruction(
       DebuggingInformation debugInfo, SSAInstruction inst, HashMap<Stmt, Integer> stmt2iIndex) {
+
+    // FIXME
+    System.out.println("inst: " + inst.iIndex() + " " + inst.toString(symbolTable));
+
     List<Stmt> stmts = new ArrayList();
     if ((inst instanceof SSAConditionalBranchInstruction)) {
       stmts.addAll(convertBranchInstruction(debugInfo, (SSAConditionalBranchInstruction) inst));
@@ -533,6 +538,7 @@ public class InstructionConverter {
     List<IntConstant> lookupValues = new ArrayList<>();
     List<Integer> targetList = new ArrayList<>();
     targetList.add(defaultCase);
+
     for (int i = 0; i < cases.length; i++) {
       int c = cases[i];
       if (i % 2 == 0) {
@@ -542,6 +548,19 @@ public class InstructionConverter {
         targetList.add(c);
       }
     }
+
+    // FIXME: remove one implementation
+    List<Integer> targetList2 = new ArrayList<>();
+    targetList2.add(defaultCase);
+    List<IntConstant> lookupValues2 = new ArrayList<>();
+    final IntIterator labelIterator = inst.iterateLabels();
+    while (labelIterator.hasNext()) {
+      final int labelInt = labelIterator.next();
+      IntConstant cValue = IntConstant.getInstance(labelInt);
+      lookupValues2.add(cValue);
+      targetList2.add(inst.getTarget(labelInt));
+    }
+    assert (targetList.equals(targetList2));
 
     Position[] operandPos = new Position[2];
     // TODO: [ms] how to organize the operands
@@ -1208,21 +1227,34 @@ public class InstructionConverter {
     }
 
     for (Map.Entry<JSwitchStmt, List<Integer>> item : targetsOfLookUpSwitchStmts.entrySet()) {
+      // FIXME
+      System.out.println();
+
       final JSwitchStmt switchStmt = item.getKey();
       final List<Integer> targetIdxList = item.getValue();
 
       // assign target for every idx in targetIdxList of switchStmt
+      // FIXME: remove debug output etc.
+      int i = 0;
+      final List<IntConstant> caselist = new ArrayList<>();
+      caselist.add(null); // default position
+      caselist.addAll(switchStmt.getValues());
+
       for (Integer targetIdx : targetIdxList) {
         // search for matching index/stmt
+        boolean found = false;
         for (Map.Entry<Stmt, Integer> jumptableEntry : stmt2iIndex.entrySet()) {
           final Stmt stmt = jumptableEntry.getKey();
           final Integer idx = jumptableEntry.getValue();
 
           if (targetIdx.equals(idx)) {
             builder.addFlow(switchStmt, stmt);
+            System.out.println(caselist.get(i++) + "=> (walaIindex: " + idx + ") " + stmt);
+            found = true;
             break;
           }
         }
+        assert (found);
       }
     }
   }

@@ -3,7 +3,7 @@
 
 
 public class SwitchCaseStatement {
-    public enum Color{
+  /*  public enum Color{
         RED, GREEN
     }
 
@@ -78,6 +78,31 @@ public class SwitchCaseStatement {
                 break;
             default:
                 str = "other";
+        }
+    }
+*/
+    public void switchCaseDifferingAmountOfCaseStmts() {
+        int num = 8;
+        String str;
+        switch (num) {
+            case 1:
+                str = "1one";
+                break;
+            case 2:
+                str = "2one";
+                str = "2two";
+                break;
+            case 3:
+                str = "3one";
+                str = "3two";
+                str = "3three";
+                break;
+            default:
+                str = "4other";
+                str = "4other";
+                str = "4other";
+                str = "4other";
+
         }
     }
 
